@@ -19,11 +19,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Generate Android Project Files Automatically
+      - name: Generate Complete Android Project Files
         run: |
           mkdir -p android-app/app/src/main/java/com/nexus/mobile
           mkdir -p android-app/app/src/main/res/layout
           mkdir -p android-app/app/src/main/res/values
+          mkdir -p android-app/gradle/wrapper
 
           # 1. settings.gradle
           cat << 'EOF' > android-app/settings.gradle
@@ -84,14 +85,22 @@ jobs:
           </manifest>
           EOF
 
+          # 6. gradle-wrapper.properties
+          cat << 'EOF' > android-app/gradle/wrapper/gradle-wrapper.properties
+          distributionBase=GRADLE_USER_HOME
+          distributionPath=wrapper/dists
+          distributionUrl=https\://services.gradle.org/distributions/gradle-7.5-bin.zip
+          zipStoreBase=GRADLE_USER_HOME
+          zipStorePath=wrapper/dists
+          EOF
+
       - name: Setup Gradle Build Action
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build with Gradle Wrapper Daemon
+      - name: Run Build via Gradle Command
         run: |
           cd android-app
-          gradle wrapper --gradle-version 7.5
-          ./gradlew assembleDebug
+          gradle assembleDebug
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
